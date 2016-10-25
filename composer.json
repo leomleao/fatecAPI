@@ -1,0 +1,30 @@
+{
+    "name": "moritz-h/slim3-rest-skeleton",
+    "description": "Simple Slim Framework 3 skeleton for REST API.",
+    "license": "BSD-3-Clause",
+    "type": "project",
+    "keywords": ["slim-framework", "skeleton", "rest"],
+    "authors": [
+        {
+            "name": "Rob Allen",
+            "email": "rob@akrabat.com",
+            "homepage": "http://akrabat.com"
+        },
+        {
+            "name": "Moritz Heinemann",
+            "email": "mo@blog-srv.net"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/src"
+        }
+    },
+    "require": {
+        "slim/slim": "^3.0",
+        "monolog/monolog": "^1.13",
+        "bshaffer/oauth2-server-php": "^1.8",
+        "bshaffer/oauth2-server-httpfoundation-bridge": "^1.1",
+        "symfony/psr-http-message-bridge": "^0.2.0"
+    }
+}
