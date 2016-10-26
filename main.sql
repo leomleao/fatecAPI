@@ -297,7 +297,7 @@ IF (NEW.notas1 <> OLD.notas1 or NEW.notas2 <> OLD.notas2 or NEW.media <> OLD.med
         VALUES 
             (OLD.codhistorico , OLD.ra , OLD.coddisciplina , OLD.semestre,OLD.ano,OLD.cargahoraria,OLD.faltas1,OLD.faltas2,OLD.faltas3,OLD.faltas4,OLD.faltas5,OLD.faltastot,OLD.media,OLD.login,OLD.dataalteracao,OLD.horaalteracao,OLD.codobservacao,OLD.notas1,OLD.notas2,OLD.ip, now(), 'ant');
 
-		INSERT INTO trk_hist 
+        INSERT INTO trk_hist 
             (`codhistorico` , `ra` , `coddisciplina` , `semestre`,`ano`,`cargahoraria`,`faltas1`,`faltas2`,`faltas3`,`faltas4`,`faltas5`,`faltastot`,`media`,`login`,`dataalteracao`,`horaalteracao`,`codobservacao`,`notas1`,`notas2`,`ip`, `dia`, `obs` ) 
         VALUES 
             (NEW.codhistorico , NEW.ra , NEW.coddisciplina , NEW.semestre,NEW.ano,NEW.cargahoraria,NEW.faltas1,NEW.faltas2,NEW.faltas3,NEW.faltas4,NEW.faltas5,NEW.faltastot,NEW.media,NEW.login,NEW.dataalteracao,NEW.horaalteracao,NEW.codobservacao,NEW.notas1,NEW.notas2,NEW.ip, now(), 'dep');
