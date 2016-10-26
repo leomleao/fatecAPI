@@ -9,6 +9,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use OAuth2\HttpFoundationBridge\Request as BridgeRequest;
 
+use App\DataAccess\_DataAccess;
+
 /**
  * Class _oAuth2TokenController
  */
@@ -23,6 +25,7 @@ final class _oAuth2TokenController
      * @var oAuth2server
      */
     private $oAuth2server;
+
 
     /**
      * @param \Psr\Log\LoggerInterface       $logger
@@ -43,7 +46,7 @@ final class _oAuth2TokenController
     public function token(Request $request, Response $response, $args)
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
-
+        var_dump($request);
         // convert a request from PSR7 to hhtpFoundation
         $httpFoundationFactory = new HttpFoundationFactory();
         $symfonyRequest = $httpFoundationFactory->createRequest($request);

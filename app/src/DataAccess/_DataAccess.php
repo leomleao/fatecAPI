@@ -76,8 +76,8 @@ class _DataAccess
     public function get($path, $args)
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
-
-        $table = $this->maintable != '' ? $this->maintable : $path;
+        
+        $table = $this->maintable != '' ? $this->maintable : $path[0];
 
         $sql = "SELECT * FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
 

@@ -17,13 +17,15 @@ $app->get('/', _ApiController::class.':showHello')
 
 // oAuth2
 $app->group('/oauth', function () {
-    $this->post('/token', _oAuth2TokenController::class.':token');
+    $this->post('/token', _oAuth2TokenController::class.':token')
+    ->setName('token');
+    $this->post('/login', _oAuth2TokenController::class.':login');
 });
 
 // Books controller
 $app->group('/books', function () {
     $this->get   ('',             _Controller_oAuth2::class.':getAll');
-    $this->get   ('/{id:[0-9]+}', _Controller_oAuth2::class.':get');
+    $this->get   ('/{ra:[0-9]{3}[a-z][0-9]{2}}', _Controller_oAuth2::class.':get');
     $this->post  ('',             _Controller_oAuth2::class.':add');
     $this->put   ('/{id:[0-9]+}', _Controller_oAuth2::class.':update');
     $this->delete('/{id:[0-9]+}', _Controller_oAuth2::class.':delete');
@@ -36,7 +38,7 @@ $app->group('/books', function () {
 
 $app->group('/alunos', function () {
     $this->get   ('',             _Controller::class.':getAll');
-    $this->get   ('/{id:[0-9]+}', _Controller::class.':get');
+    $this->get   ('/{ra:[0-9]{3}[a-z][0-9]{2}}', _Controller::class.':get');
     $this->post  ('',             _Controller::class.':add');
     $this->put   ('/{id:[0-9]+}', _Controller::class.':update');
     $this->delete('/{id:[0-9]+}', _Controller::class.':delete');

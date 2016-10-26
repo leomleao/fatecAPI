@@ -72,15 +72,15 @@ class Route extends Routable implements RouteInterface
     /**
      * Create new route
      *
-     * @param string[]     $methods The route HTTP methods
-     * @param string       $pattern The route pattern
-     * @param callable     $callable The route callable
-     * @param int          $identifier The route identifier
-     * @param RouteGroup[] $groups The parent route groups
+     * @param string|string[]   $methods The route HTTP methods
+     * @param string            $pattern The route pattern
+     * @param callable          $callable The route callable
+     * @param RouteGroup[]      $groups The parent route groups
+     * @param int               $identifier The route identifier
      */
     public function __construct($methods, $pattern, $callable, $groups = [], $identifier = 0)
     {
-        $this->methods  = $methods;
+        $this->methods  = is_string($methods) ? [$methods] : $methods;
         $this->pattern  = $pattern;
         $this->callable = $callable;
         $this->groups   = $groups;
@@ -311,6 +311,8 @@ class Route extends Routable implements RouteInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
+        $this->callable = $this->resolveCallable($this->callable);
+
         /** @var InvocationStrategyInterface $handler */
         $handler = isset($this->container) ? $this->container->get('foundHandler') : new RequestResponse();
 

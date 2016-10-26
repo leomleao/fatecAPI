@@ -33,6 +33,51 @@ class _Controller
         $this->dataaccess = $dataaccess;
     }
 
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     * @param array                                    $args
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function login(Request $request, Response $response, $args)
+    {
+        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
+
+        $request_data = $request->getParsedBody();
+
+        $userGivenPassword = $request_data['password'];
+
+        $result = $this->dataaccess->get(array(0 => 'alunos', 'ra' => $request_data['ra']), array('ra' => $request_data['ra'])); 
+
+        
+
+
+        if ($result['senha'] == $userGivenPassword){
+            $test = array ('error' => false, 'test' => 'successfully logged!');
+
+        } else {
+            $test = array ('error' => true, 'test' => 'Something bad happened');
+
+        }   
+
+        $error = array ('error' => true, 'cause' => 'IncorretPassword');
+
+        $data[] = [
+                "error"   => true,
+                "cause" => 'IncorretPassword'
+            ]; 
+        $res = $this->app->subRequest('POST', '/token');
+
+        _oAuth2TokenController::class.':token'
+
+        return $response->write(json_encode($res))
+                        ->withStatus(201);
+    }
+
+
+
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Psr\Http\Message\ResponseInterface      $response
@@ -48,6 +93,7 @@ class _Controller
 
         $arrparams = $request->getParams();
 
+
 		return $response->write(json_encode($this->dataaccess->getAll($path[0], $arrparams)));
     }
 
@@ -62,7 +108,7 @@ class _Controller
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
 
-        $path = explode('/', $request->getUri()->getPath())[1];
+        $path = explode('/', $request->getUri()->getPath());
 
         $result = $this->dataaccess->get($path, $args);
         if ($result == null) {
