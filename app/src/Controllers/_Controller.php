@@ -12,7 +12,10 @@ use App\DataAccess\_DataAccess;
  * Class _Controller.
  */
 class _Controller
-{
+{      
+
+     private $slim;
+
     /**
      * @var \Psr\Log\LoggerInterface
      */
@@ -27,11 +30,13 @@ class _Controller
      * @param \Psr\Log\LoggerInterface       $logger
      * @param \App\DataAccess                $dataaccess
      */
-    public function __construct(LoggerInterface $logger, _DataAccess $dataaccess)
-    {
+    public function __construct(LoggerInterface $logger, _DataAccess $dataaccess, $slim)
+    {       
         $this->logger = $logger;
         $this->dataaccess = $dataaccess;
+        $this->slim = $slim;
     }
+
 
 
     /**
@@ -48,31 +53,49 @@ class _Controller
         $request_data = $request->getParsedBody();
 
         $userGivenPassword = $request_data['password'];
+        $userID = $request_data['ra'];
 
-        $result = $this->dataaccess->get(array(0 => 'alunos', 'ra' => $request_data['ra']), array('ra' => $request_data['ra'])); 
+        $result = $this->dataaccess->get('alunos', array('ra' => $userID));
 
         
-
-
         if ($result['senha'] == $userGivenPassword){
-            $test = array ('error' => false, 'test' => 'successfully logged!');
+
+
+            $oAuthData = array('tableName' => 'oauth_clients', 'data' => array('client_id' => '141b22', 'client_secret' => 'f3fec09ff9a7b5133bb7307261e50b779db63164774fd1f0e3f7ba9fc08d0436', 'grant_types' => 'client_credentials', 'redirect_uri' => 'http://fatecapi.tk/public'));
+
+
+
+
+            $isInserted = $this->dataaccess->add($oAuthData['tableName'], $oAuthData['data']);
+
+            if (!$isInserted) { 
+                $oAuthClient = $this->dataaccess->get('oauth_clients', array('client_id' => $userID));
+                if ($oAuthClient){
+                    if ($oAuthClient['client_secret'] != $userGivenPassword) {
+                    // check and update the client password if is different
+                    } 
+                     
+                } 
+            }  
+
+            $data = "client_id=" . $userID .  "&client_secret=" . $userGivenPassword . "&grant_type=client_credentials" ;
+
+            $token = $this->slim->subRequest('POST', '/oauth/token', '' , ['Content-Type' => 'application/x-www-form-urlencoded'], [], $data,  new \Slim\Http\Response());
+                    $token = $token->getBody();
+
+
+
+
+
+        $responseBody = array ('error' => false, 'test' => 'successfully logged!');           
+
 
         } else {
-            $test = array ('error' => true, 'test' => 'Something bad happened');
+            $responseBody = array ('error' => true, 'test' => 'Something bad happened');
 
-        }   
+        } 
 
-        $error = array ('error' => true, 'cause' => 'IncorretPassword');
-
-        $data[] = [
-                "error"   => true,
-                "cause" => 'IncorretPassword'
-            ]; 
-        $res = $this->app->subRequest('POST', '/token');
-
-        _oAuth2TokenController::class.':token'
-
-        return $response->write(json_encode($res))
+        return $response->write(json_encode($responseBody))
                         ->withStatus(201);
     }
 
@@ -92,7 +115,6 @@ class _Controller
         $path = explode('/', $request->getUri()->getPath());
 
         $arrparams = $request->getParams();
-
 
 		return $response->write(json_encode($this->dataaccess->getAll($path[0], $arrparams)));
     }
@@ -129,10 +151,9 @@ class _Controller
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
 
-        $path = explode('/', $request->getUri()->getPath())[1];
-        $request_data = $request->getParsedBody();
+        $oAuthData = array('tableName' => 'oauth_clients', 'data' => array('client_id' => '141b22', 'client_secret' => 'f3fec09ff9a7b5133bb7307261e50b779db63164774fd1f0e3f7ba9fc08d0436', 'grant_types' => 'client_credentials', 'redirect_uri' => 'http://fatecapi.tk/public'));
 
-        $last_inserted_id = $this->dataaccess->add($path, $request_data);
+            $last_inserted_id = $this->dataaccess->add($oAuthData['tableName'], $oAuthData['data']);
         if ($last_inserted_id > 0) {
             $RequesPort = '';
 		    if ($request->getUri()->getPort()!='')

@@ -46,7 +46,6 @@ final class _oAuth2TokenController
     public function token(Request $request, Response $response, $args)
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
-        var_dump($request);
         // convert a request from PSR7 to hhtpFoundation
         $httpFoundationFactory = new HttpFoundationFactory();
         $symfonyRequest = $httpFoundationFactory->createRequest($request);

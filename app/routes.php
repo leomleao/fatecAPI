@@ -17,9 +17,8 @@ $app->get('/', _ApiController::class.':showHello')
 
 // oAuth2
 $app->group('/oauth', function () {
-    $this->post('/token', _oAuth2TokenController::class.':token')
-    ->setName('token');
-    $this->post('/login', _oAuth2TokenController::class.':login');
+    $this->post('/token', _oAuth2TokenController::class.':token');
+    $this->post('/login', _Controller::class.':login');
 });
 
 // Books controller

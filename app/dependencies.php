@@ -16,6 +16,11 @@ use App\Controllers\_oAuth2TokenController;
 
 $container = $app->getContainer();
 
+$container['slim'] = function ($c) {
+    global $app;
+    return $app;
+};
+
 // monolog
 $container['logger'] = function ($c) {
     $settings = $c->get('settings');
@@ -48,6 +53,7 @@ $container['oAuth'] = function ($c) {
     return $server;
 };
 
+
 // APIController
 $container['App\Controllers\_ApiController'] = function ($c) {
     return new _ApiController($c->get('logger'),$c->get('settings')['PoweredBy']);
@@ -55,7 +61,7 @@ $container['App\Controllers\_ApiController'] = function ($c) {
 
 // Generic Controller
 $container['App\Controllers\_Controller'] = function ($c) {
-    return new _Controller($c->get('logger'), $c->get('App\DataAccess\_DataAccess'));
+    return new _Controller($c->get('logger'), $c->get('App\DataAccess\_DataAccess'),$c->get('slim'));
 };
 
 // Generic DataAccess
@@ -73,6 +79,8 @@ $container['App\Controllers\_oAuth2TokenController'] = function ($c) {
 $container['App\Controllers\_Controller_oAuth2'] = function ($c) {
     return new _Controller_oAuth2($c->get('logger'), $c->get('App\DataAccess\_DataAccess'), $c->get('oAuth'));
 };
+
+
 
 
 

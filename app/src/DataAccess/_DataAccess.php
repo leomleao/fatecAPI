@@ -77,7 +77,7 @@ class _DataAccess
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
         
-        $table = $this->maintable != '' ? $this->maintable : $path[0];
+        $table = $this->maintable != '' ? $this->maintable : $path;
 
         $sql = "SELECT * FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
 
@@ -111,18 +111,19 @@ class _DataAccess
         }
 
         $columnString = implode(',', array_flip($request_data));
-        $valueString = ":".implode(',:', array_flip($request_data));
+        $valueString = implode("', '", $request_data);
 
-        $sql = "INSERT INTO " . $table . " (" . $columnString . ") VALUES (" . $valueString . ")";
+        $sql = "INSERT INTO " . $table . " (" . $columnString . ") VALUES ('" . $valueString . "')";
+
         $stmt = $this->pdo->prepare($sql);
 
         foreach($request_data as $key => $value){
             $stmt->bindValue(':' . $key,$request_data[$key]);
         }
 
-        $stmt->execute();
+        $status = $stmt->execute();
 
-        return $this->pdo->lastInsertId();
+        return $status;
     }
 
     /**
