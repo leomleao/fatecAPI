@@ -21,7 +21,7 @@ class _oAuth2_CustomStorage extends Pdo
 
     public function getUser($username)
     {
-        $stmt = $this->db->prepare($sql = sprintf('SELECT ra, nome, email2, senha from %s where email2=:username', $this->config['user_table']));
+        $stmt = $this->db->prepare($sql = sprintf('SELECT ra, nome, email, senha from %s where email=:username', $this->config['user_table']));
         $stmt->execute(array('username' => $username));
 
         if (!$userInfo = $stmt->fetch(\PDO::FETCH_ASSOC)) {

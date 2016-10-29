@@ -16,7 +16,11 @@ use App\DataAccess\_DataAccess;
  * Class _Controller_oAuth2
  */
 class _Controller_oAuth2 extends _Controller
-{
+{   
+
+    private $slim;
+
+
     /**
      * @var oAuth2server
      */
@@ -30,12 +34,13 @@ class _Controller_oAuth2 extends _Controller
     /**
      * @param \Psr\Log\LoggerInterface       $logger
      * @param \App\DataAccess                $dataaccess
-     * @param                                $server
+     * @param                                $server     
+     * @param \App\$app                      $slim
      */
-    public function __construct(LoggerInterface $logger, _DataAccess $dataaccess, $server)
+    public function __construct(LoggerInterface $logger, _DataAccess $dataaccess, $server, $slim)
     {
-        parent::__construct($logger,$dataaccess);
-        $this->oAuth2server = $server;
+        parent::__construct($logger,$dataaccess,$slim);
+        $this->oAuth2server = $server;  
     }
     
      /**

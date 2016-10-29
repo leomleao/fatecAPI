@@ -76,12 +76,15 @@ class _DataAccess
     public function get($path, $args)
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
-        
+               
         $table = $this->maintable != '' ? $this->maintable : $path;
 
+
         $sql = "SELECT * FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
+          
 
         $stmt = $this->pdo->prepare($sql);
+
         // bind the key
         $stmt->bindValue(':' . implode(',', array_flip($args)), implode(',', $args));
 
@@ -90,6 +93,49 @@ class _DataAccess
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         } else {
         	$result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return one object
+     */
+    public function getJoin($path, $args)
+    {
+        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);        
+               
+        //prepare JOINs
+        $joinSQL = '';        
+        $table = array_keys($path)[1];
+        $tableJoin = array_keys($path)[2];
+
+        $requiredFields = '';
+
+        foreach ($path[array_keys($path)[1]] as $field){
+          $requiredFields .= ', ' . $table . '.' . $field;
+        }
+
+        foreach ($path[array_keys($path)[2]] as $field){
+          $requiredFields .= ', ' . $tableJoin . '.' . $field;
+        }
+          
+        $joinSQL .= ' LEFT JOIN ' . array_keys($path)[2] . ' ON ' . $table . '.' . $path['joinON'] . ' = ' . $tableJoin. '.' . $path['joinON'];        
+
+
+        $sql = "SELECT " . substr($requiredFields, 2) . " FROM ". $table . $joinSQL . ' WHERE ' . array_keys($args)[0] .  ' = ' .'"'. implode(',', $args)  .'"';
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute();
+        if ($stmt) {
+            while($row = $stmt->fetch(\PDO::FETCH_ASSOC)){
+              $result[] = $row;
+            }           
+        } else {
+          $result = null;
         }
 
         return $result;
@@ -185,4 +231,60 @@ class _DataAccess
 
       	return ($stmt->rowCount() > 0) ? true : false;
     }
+
+
+    /**
+
+    **
+
+    END OF GENERIC FUNCTIONS
+
+    **
+
+    ------------ ** ------------
+
+    **
+
+    START OF API SPECIFIC FUNCTIONS
+
+    **
+
+    **/
+
+
+
+    /**
+     * @param int $id
+     *
+     * @return one object
+     */
+    public function getGrade($args)
+    {
+        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
+               
+        $table = 'alunos';
+
+        $what = implode(',', array_flip($args['required']));
+
+        $sql = "SELECT * FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
+          
+
+        $stmt = $this->pdo->prepare($sql);
+
+        // bind the key
+        $stmt->bindValue(':' . implode(',', array_flip($args)), implode(',', $args));
+
+        $stmt->execute();
+        if ($stmt) {
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        } else {
+          $result = null;
+        }
+
+        return $result;
+    }
+
+
+
+
 }

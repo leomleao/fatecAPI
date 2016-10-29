@@ -77,7 +77,7 @@ $container['App\Controllers\_oAuth2TokenController'] = function ($c) {
 
 // Generic Controller oAuth2
 $container['App\Controllers\_Controller_oAuth2'] = function ($c) {
-    return new _Controller_oAuth2($c->get('logger'), $c->get('App\DataAccess\_DataAccess'), $c->get('oAuth'));
+    return new _Controller_oAuth2($c->get('logger'), $c->get('App\DataAccess\_DataAccess'), $c->get('oAuth'),$c->get('slim'));
 };
 
 

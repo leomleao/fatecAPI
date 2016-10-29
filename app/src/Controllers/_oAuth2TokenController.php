@@ -50,9 +50,7 @@ final class _oAuth2TokenController
         $httpFoundationFactory = new HttpFoundationFactory();
         $symfonyRequest = $httpFoundationFactory->createRequest($request);
         $bridgeRequest = BridgeRequest::createFromRequest($symfonyRequest);
-        
-		$this->oAuth2server->handleTokenRequest($bridgeRequest)->send();
-
+        return $this->oAuth2server->handleTokenRequest($bridgeRequest)->send();
     }
 
     
