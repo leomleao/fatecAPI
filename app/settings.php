@@ -5,7 +5,7 @@ return [
         // Slim Settings
         'determineRouteBeforeAppMiddleware' => false,
         'displayErrorDetails' => true,
-        'PoweredBy' => 'fatecTCC',
+        'PoweredBy' => 'Grupo TCC',
 
         // database settings
         'pdo' => [

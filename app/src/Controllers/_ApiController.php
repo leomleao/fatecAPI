@@ -42,6 +42,6 @@ final class _ApiController
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
 
-        return $response->write($this->powered.' using Slim 3 Framework');
+        return $response->write('Api made for Fatec by ' . $this->powered . ' as part of course conclusion project!');
     }
 }
