@@ -73,24 +73,43 @@ class _DataAccess
      *
      * @return one object
      */
-    public function get($path, $args)
+    public function get($path, $args, $where = null)
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
                
         $table = $this->maintable != '' ? $this->maintable : $path;
 
-
+        if(!$where){
         $sql = "SELECT * FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
-          
+        }
+
+
+        if($where){
+            $sql = "SELECT * FROM ". $table . ' WHERE';
+            foreach ($args as $key => $value) { 
+
+              $sql .=  ' OR ' . implode(',', array_flip($value)) . ' = ' . implode(',', $value);           
+                          
+            }
+            $sql = str_replace('WHERE OR', 'WHERE ', $sql);           
+        }
 
         $stmt = $this->pdo->prepare($sql);
-
+        if(!$where){
+          $stmt->bindValue(':' . implode(',', array_flip($args)), implode(',', $args));
+        }
         // bind the key
-        $stmt->bindValue(':' . implode(',', array_flip($args)), implode(',', $args));
+        
 
         $stmt->execute();
         if ($stmt) {
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if($where){
+              $result = array();
+                while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                  $result[] = $row;
+                }
+            }
         } else {
         	$result = null;
         }

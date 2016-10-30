@@ -52,7 +52,7 @@ CREATE TABLE oauth_clients (
   redirect_uri VARCHAR(2000) NOT NULL,
   grant_types VARCHAR(80),
   scope VARCHAR(100), user_id VARCHAR(80),
-CONSTRAINT clients_client_id_pk PRIMARY KEY (client_id));
+CONSTRAINT clients_client_id_pk PRIMARY KEY (client_id)) COMMENT='This table holds the data of all the API\'s clients. User needs to be here to get a token!';
 
 CREATE TABLE oauth_access_tokens (
   access_token VARCHAR(40) NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE oauth_access_tokens (
   user_id VARCHAR(255),
   expires TIMESTAMP NOT NULL,
   scope VARCHAR(2000),
-CONSTRAINT access_token_pk PRIMARY KEY (access_token));
+CONSTRAINT access_token_pk PRIMARY KEY (access_token)) COMMENT='This table holds the data of all generated tokens, and to whom they have been generated to.';
 
 CREATE TABLE oauth_authorization_codes (
   authorization_code VARCHAR(40) NOT NULL,

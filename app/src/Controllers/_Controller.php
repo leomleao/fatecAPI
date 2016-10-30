@@ -60,8 +60,9 @@ class _Controller
 
         
         if ($studentData['senha'] === $userGivenPassword){
-        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User authenticated!');            
-            $oAuthData = array('tableName' => 'oauth_clients', 'data' => array('client_id' => $userID, 'client_secret' => $userGivenPassword, 'grant_types' => 'client_credentials'));
+        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User authenticated!'); 
+
+        $oAuthData = array('tableName' => 'oauth_clients', 'data' => array('client_id' => $userID, 'client_secret' => $userGivenPassword, 'grant_types' => 'client_credentials'));
 
 
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' Attempt to insert user to oAuth client table!');  
@@ -133,12 +134,15 @@ class _Controller
         $semester = explode('/',date('n/Y', time()))[0] <= 6 ?'1' : '2';
         $ano = explode('/',date('n/Y', time()))[1];
 
-        for ($i = 0;$i < count($studentGrade);$i++){
+         for ($i = 0;$i < count($studentGrade);$i++){
             if ($studentGrade[$i]['semestre'] && $studentGrade[$i]['ano']){
-               if ($studentGrade[$i]['ano'] != $ano || $studentGrade[$i]['semestre'] != $semester){
+               if ($studentGrade[$i]['ano'] != $ano || $studentGrade[$i]['semestre'] != $semester){                
                 unset($studentGrade[$i]);
-               }                
-            }
+                $studentGrade = array_values($studentGrade);
+                $i--;
+                continue;
+               } 
+            }            
         }
 
         $response->write(json_encode($studentGrade))
@@ -196,18 +200,38 @@ class _Controller
             array('joinON' =>'coddisciplina', 'historico' => array('ra', 'coddisciplina', 'semestre', 'ano', 'faltastot', 'notas1', 'notas2', 'media'), 'disciplinas' => array('disciplina')), array('ra' => $requestData['ra']));
         $semester = explode('/',date('n/Y', time()))[0] <= 6 ?'1' : '2';
         $ano = explode('/',date('n/Y', time()))[1];
+        $studentDisciplines = array();
 
         for ($i = 0;$i < count($studentGrade);$i++){
             if ($studentGrade[$i]['semestre'] && $studentGrade[$i]['ano']){
-               if ($studentGrade[$i]['ano'] != $ano || $studentGrade[$i]['semestre'] != $semester){
+               if ($studentGrade[$i]['ano'] != $ano || $studentGrade[$i]['semestre'] != $semester){                
                 unset($studentGrade[$i]);
+                $studentGrade = array_values($studentGrade);
+                $i--;
                 continue;
-               }                
-            }
-            
+               } 
+            array_push($studentDisciplines, array('coddisciplina' => $studentGrade[$i]['coddisciplina']));
+            }            
         }
 
-        var_dump($studentGrade);
+        $studentSchedule = $this->dataaccess->get('horario', $studentDisciplines, TRUE);
+
+
+        for ($i = 0; $i < count($studentSchedule);$i++){    
+
+            for ($j = 0;$j < count($studentGrade);$j++){
+                if($studentGrade[$j]['coddisciplina'] == $studentSchedule[$i]['coddisciplina'])
+                {
+                $studentSchedule[$i]['disciplina'] = $studentGrade[$j]['disciplina'];
+                }
+            }
+        }            
+
+
+
+        return $response->write(json_encode($studentSchedule))
+                        ->withStatus(200);
+
 
         } else if($oAuthTokenData && $oAuthTokenData['client_id'] != $requestData['ra']){
             
@@ -228,38 +252,89 @@ class _Controller
 
     }
 
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     * @param array                                    $args
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function changePassword(Request $request, Response $response, $args)
+    {
+        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
+
+        $requestData = $request->getParsedBody();
+
+        if(!array_key_exists('ra', $requestData)){
+            //check for ra in the request
+            $responseBody = array('error' => 'true', 'description' => 'Invalid request, must give user_id!');
+
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(400);
+        }
+
+        //prepare $args
+        $token = str_replace('Bearer ', '', $request->getServerParams()['HTTP_AUTHORIZATION']);
+
+        $oAuthTokenData = $this->dataaccess->get('oauth_access_tokens', array('access_token' => $token));
+
+        //check validity of token against the user_id
+        if ($oAuthTokenData && $oAuthTokenData['client_id'] === $requestData['ra']){
+
+
+            $studentData = $this->dataaccess->get('alunos', array('ra' => $requestData['ra']));
+
+            if(($requestData['rg'] && $requestData['rg'] === $studentData['rg']) && ($requestData['datanascimento'] && $requestData['datanascimento'] === date('d/m/Y', strtotime($studentData['datanascimento'])))){
+                
+                if($requestData['password'] === $requestData['newpassword'])
+                {
+                    //all correct, change the password
+                    $isupdated = $this->dataaccess->update('alunos', array('ra' => $requestData['ra']), array('senha' => $requestData['password'])) && $this->dataaccess->update('oauth_clients', array('client_id' => $requestData['ra']), array('client_secret' => $requestData['password']));
+                    // 
+
+                    if ($isupdated) {
+                        return $response->write(json_encode(array('error' => 'false', 'description' => 'Password updated successfully!')))
+                                        ->withStatus(200);
+                    } else {
+
+                        return $response->write(json_encode(array('error' => 'true', 'description' => 'Password not updated!')))
+                                        ->withStatus(200);
+                    }
+                    // $oAuthUpdatePassword = $this->dataaccess->update('alunos', array('ra' => $userID));
+                } else {
+                    return $response->write(json_encode(array('error' => 'true', 'description' => 'Password and new password must match!')))
+                                        ->withStatus(200);
+                }              
+            } else if(($requestData['rg'] && $requestData['rg'] != $studentData['rg']) || ($requestData['datanascimento'] && $requestData['datanascimento'] != date('d/m/Y', strtotime($studentData['datanascimento'])))){
+                 return $response->write(json_encode(array('error' => 'true', 'description' => 'RG and/or birth date doesn\'t match'), JSON_UNESCAPED_SLASHES))
+                                        ->withStatus(200);
+            }   
+
+            else if(!$requestData['rg'] || !$requestData['datanascimento']){
+                 return $response->write(json_encode(array('error' => 'true', 'description' => 'No RG and/or birth date provided!'), JSON_UNESCAPED_SLASHES))
+                                        ->withStatus(200);
+            }    
 
 
 
+        } else if($oAuthTokenData && $oAuthTokenData['client_id'] != $requestData['ra']){
+            
+            $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $oAuthTokenData['client_id'].' \'s token was used in a attempt to get another user\'s grade (' . $requestData['ra'] . ').');
 
+            $responseBody = array('error' => 'true', 'description' => 'This token belongs to another user, admin was reported!');
 
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(401);
+        } else {
+             $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $requestData['ra'] .' tried to request info using a invalid token.');
 
+            $responseBody = array('error' => 'true', 'description' => 'This token is invalid or no longer exists.');
 
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(440);
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
@@ -299,35 +374,7 @@ class _Controller
             return $response->write(json_encode($result));
         }
     }
-
-    /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Psr\Http\Message\ResponseInterface      $response
-     * @param array                                    $args
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function add(Request $request, Response $response, $args)
-    {
-        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
-
-        $oAuthData = array('tableName' => 'oauth_clients', 'data' => array('client_id' => '141b22', 'client_secret' => 'f3fec09ff9a7b5133bb7307261e50b779db63164774fd1f0e3f7ba9fc08d0436', 'grant_types' => 'client_credentials', 'redirect_uri' => 'http://fatecapi.tk/public'));
-
-            $last_inserted_id = $this->dataaccess->add($oAuthData['tableName'], $oAuthData['data']);
-        if ($last_inserted_id > 0) {
-            $RequesPort = '';
-		    if ($request->getUri()->getPort()!='')
-		    {
-		        $RequesPort = '.'.$request->getUri()->getPort();
-		    }
-            $LocationHeader = $request->getUri()->getScheme().'://'.$request->getUri()->getHost().$RequesPort.$request->getUri()->getPath().'/'.$last_inserted_id;
-
-            return $response ->withHeader('Location', $LocationHeader)
-                             ->withStatus(201);
-        } else {
-            return $response ->withStatus(403);
-        }
-    }
+    
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request

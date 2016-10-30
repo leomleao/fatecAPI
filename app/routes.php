@@ -26,7 +26,7 @@ $app->group('/books', function () {
     $this->get   ('',             _Controller_oAuth2::class.':getAll');
     $this->get   ('/{ra:[0-9]{3}[a-z][0-9]{2}}', _Controller_oAuth2::class.':get');
     $this->post  ('',             _Controller_oAuth2::class.':add');
-    $this->put   ('/{id:[0-9]+}', _Controller_oAuth2::class.':update');
+    $this->put   ('/{id:[0-9]+}', _Controller::class.':update');
     $this->delete('/{id:[0-9]+}', _Controller_oAuth2::class.':delete');
     
 //})->add(function ($request, $response, $next) {
@@ -46,6 +46,8 @@ $app->group('/alunos', function () {
 $app->post('/grade', _Controller::class.':grade');
 
 $app->post('/gradeSchedule', _Controller::class.':gradeSchedule');
+
+$app->put('/changePassword', _Controller::class.':changePassword');
 
 // Custom Controllers
 //$app->group('/mycustom', function () {
