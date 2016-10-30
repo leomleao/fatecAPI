@@ -13,10 +13,26 @@ Taken from https://github.com/pabloroca/slim3-apiratelimit-middleware but with a
 
 ## Methods
 
-**login**
+All methods can return:
+
+```json
+{
+  "error": false,
+  "description": "I'm a description of what just happened!"
+}
+```
+
+- Error: can be **false** or **true**
+- Description: description of the return status which can be: 
+  * Invalid request, must give user_id!
+  * This token belongs to another user, admin was reported!
+  * This token is invalid or no longer exists.
+
+
+###login###
 
 ```
-request: https://apy.mydomain.com/books
+request: POST http://fatecapi.tk/public/alunos
 Request headers send:
 Content-Type: application/json
 Authorization: Bearer MYTOKEN
@@ -24,9 +40,20 @@ ra=RADOALUNO&password=SENHADOALUNO&grant_type=client_credentials
 
 ```
 
+data can also be sended in JSON format:
+
+```json
+{
+"ra":"RADOALUNO","
+password":"SENHADOALUNO",
+"grant_type":"client_credentials"
+}
+```
+SENHA must be in sha256*
+
  It returns:
 
- ```
+```json
 {
   "error": false,
   "description": "Successfully authenticated!",
@@ -38,12 +65,186 @@ ra=RADOALUNO&password=SENHADOALUNO&grant_type=client_credentials
 }
 ```
 
-- Error: can be **false** or **true**
-- Description: description of the return status
 - access_token: token that shall be used to access protect resources
 - expiresin: when the token will expire
 
+###grade###
 
+```
+request: POST http://fatecapi.tk/public/grade
+Request headers send:
+Content-Type: application/json
+Authorization: Bearer MYTOKEN
+ra=RADOALUNO
+
+```
+
+data can also be sended in JSON format:
+
+```json
+{"ra":"141b22"}
+```
+
+ It returns an JSON array of all the student's disciplines **in the current semester/year**:
+
+```json
+[
+  {
+    "ra": "141b22",
+    "coddisciplina": "1",
+    "semestre": "2",
+    "ano": "2016",
+    "faltastot": "0",
+    "notas1": null,
+    "notas2": null,
+    "media": null,
+    "disciplina": "Estágio Supervisionado"
+  },
+  {
+    "ra": "141b22",
+    "coddisciplina": "2",
+    "semestre": "2",
+    "ano": "2016",
+    "faltastot": "4",
+    "notas1": "5.0",
+    "notas2": null,
+    "media": null,
+    "disciplina": "Gestão e Governança de Tecnologia da Informação"
+  },
+  {
+    "ra": "141b22",
+    "coddisciplina": "3",
+    "semestre": "2",
+    "ano": "2016",
+    "faltastot": "8",
+    "notas1": null,
+    "notas2": null,
+    "media": "6.0",
+    "disciplina": "Inteligência Artificial"
+  },
+  {
+    "ra": "141b22",
+    "coddisciplina": "4",
+    "semestre": "2",
+    "ano": "2016",
+    "faltastot": "0",
+    "notas1": null,
+    "notas2": null,
+    "media": "0",
+    "disciplina": "Trabalho de Graduação II"
+  }
+]
+
+
+```
+
+###gradeSchedule###
+
+```
+request: POST http://fatecapi.tk/public/gradeSchedule
+Request headers send:
+Content-Type: application/json
+Authorization: Bearer MYTOKEN
+ra=RADOALUNO
+
+```
+
+data can also be sended in JSON format:
+
+```json
+{"ra":"141b22"}
+```
+
+It returns all the discipline's schedule of the student **in the current semester/year**:
+
+```json
+[
+  {
+    "codhorario": "2",
+    "codcurso": null,
+    "ano": "2016",
+    "semestre": "2",
+    "periodo": "6",
+    "horario": "19:00 / 22:30",
+    "coddisciplina": "2",
+    "linha": null,
+    "login": null,
+    "dataalteracao": null,
+    "horaalteracao": null,
+    "periododia": "3",
+    "disciplina": "Gestão e Governança de Tecnologia da Informação"
+  },
+  {
+    "codhorario": "3",
+    "codcurso": null,
+    "ano": "2016",
+    "semestre": "2",
+    "periodo": "4",
+    "horario": "19:00 / 22:30",
+    "coddisciplina": "3",
+    "linha": null,
+    "login": null,
+    "dataalteracao": null,
+    "horaalteracao": null,
+    "periododia": "3",
+    "disciplina": "Inteligência Artificial"
+  },
+  {
+    "codhorario": "4",
+    "codcurso": null,
+    "ano": "2016",
+    "semestre": "2",
+    "periodo": "7",
+    "horario": "07:30 / 08:20",
+    "coddisciplina": "4",
+    "linha": null,
+    "login": null,
+    "dataalteracao": null,
+    "horaalteracao": null,
+    "periododia": "3",
+    "disciplina": "Trabalho de Graduação II"
+  }
+]
+```
+
+###changePassword###
+
+```
+request: PUT http://fatecapi.tk/public/changePassword
+Request headers send:
+Content-Type: application/json
+Authorization: Bearer MYTOKEN
+ra=RADOALUNO&rg=RGDOALUNO&datanascimento=DATANASCIMENTODOALUNO&password=NOVASENHA&newpassword=CONFNOVASENHA
+
+```
+
+data can also be sended in JSON format:
+
+```json
+{
+"ra":"RADOALUNO",
+"rg":"RDGOALUNO",
+"datanascimento":"DATADENASCIMENTODOALUNO",
+"password":"NOVASENHA",
+"newpassword":"CONFNOVASENHA"
+}
+```
+
+*datanascimento must be in 'd/m/Y' format
+
+It returns:
+
+```json
+{"error":"false","description":"Password updated successfully!"}
+```
+
+- Error: can be **false** or **true**
+- Description: description of the return status which can be:  
+  * Password updated successfully!
+  * Password not updated!
+  * Password and new password must match!
+  * RG and/or birth date doesn\'t match.
+  * No RG and/or birth date provided!  
 
 
 **Calling oAuth**

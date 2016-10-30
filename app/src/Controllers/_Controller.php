@@ -306,7 +306,7 @@ class _Controller
                                         ->withStatus(200);
                 }              
             } else if(($requestData['rg'] && $requestData['rg'] != $studentData['rg']) || ($requestData['datanascimento'] && $requestData['datanascimento'] != date('d/m/Y', strtotime($studentData['datanascimento'])))){
-                 return $response->write(json_encode(array('error' => 'true', 'description' => 'RG and/or birth date doesn\'t match'), JSON_UNESCAPED_SLASHES))
+                 return $response->write(json_encode(array('error' => 'true', 'description' => 'RG and/or birth date doesn\'t match.'), JSON_UNESCAPED_SLASHES))
                                         ->withStatus(200);
             }   
 
