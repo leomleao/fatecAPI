@@ -197,7 +197,7 @@ class _Controller
         if ($oAuthTokenData && $oAuthTokenData['client_id'] === $requestData['ra']){
 
         $studentGrade = $this->dataaccess->getJoin(
-            array('joinON' =>'coddisciplina', 'historico' => array('ra', 'coddisciplina', 'semestre', 'ano', 'faltastot', 'notas1', 'notas2', 'media'), 'disciplinas' => array('disciplina')), array('ra' => $requestData['ra']));
+            array('joinON' =>'coddisciplina', 'historico' => array('ra', 'coddisciplina', 'semestre', 'ano'), 'disciplinas' => array('disciplina')), array('ra' => $requestData['ra']));
         $semester = explode('/',date('n/Y', time()))[0] <= 6 ?'1' : '2';
         $ano = explode('/',date('n/Y', time()))[1];
         $studentDisciplines = array();
@@ -214,7 +214,7 @@ class _Controller
             }            
         }
 
-        $studentSchedule = $this->dataaccess->get('horario', $studentDisciplines, TRUE);
+        $studentSchedule = $this->dataaccess->get(array('table' => 'horario', 'columns' => array('coddisciplina', 'horario', 'periododia', 'periodo as diadasemana', 'ano', 'semestre') ), $studentDisciplines, TRUE);
 
 
         for ($i = 0; $i < count($studentSchedule);$i++){    
@@ -222,10 +222,15 @@ class _Controller
             for ($j = 0;$j < count($studentGrade);$j++){
                 if($studentGrade[$j]['coddisciplina'] == $studentSchedule[$i]['coddisciplina'])
                 {
-                $studentSchedule[$i]['disciplina'] = $studentGrade[$j]['disciplina'];
+                // $studentSchedule[$i]['disciplina'] = $studentGrade[$j]['disciplina'];
+                $studentSchedule[$i] = array('disciplina' => $studentGrade[$j]['disciplina']) + $studentSchedule[$i];
+
                 }
             }
-        }            
+        } 
+
+        // array_multisort($studentSchedule, SORT_ASC, ) 
+        usort($studentSchedule, function ($a, $b) { return strnatcmp($a['coddisciplina'], $b['coddisciplina']); });          
 
 
 

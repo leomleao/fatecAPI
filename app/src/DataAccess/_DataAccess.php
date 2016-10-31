@@ -75,17 +75,28 @@ class _DataAccess
      */
     public function get($path, $args, $where = null)
     {
-        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
+        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);        
+        if (is_string($path)){
+          $selects = NULL;
+          $table = $this->maintable != '' ? $this->maintable : $path;
+        } else {
+          $selects = '';
+          foreach ($path['columns'] as $field){
+            $selects .= ', ' . $field;
+          }    
+          $selects = substr($selects, 2);   
+          $table = $this->maintable != '' ? $this->maintable : $path['table'];          
+        }     
                
-        $table = $this->maintable != '' ? $this->maintable : $path;
+        
 
         if(!$where){
-        $sql = "SELECT * FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
-        }
+        $sql = "SELECT " . ($selects ? $selects : '*') . " FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
+        }        
 
 
         if($where){
-            $sql = "SELECT * FROM ". $table . ' WHERE';
+            $sql = "SELECT " . ($selects ? $selects: '*') . " FROM ". $table . ' WHERE';
             foreach ($args as $key => $value) { 
 
               $sql .=  ' OR ' . implode(',', array_flip($value)) . ' = ' . implode(',', $value);           
