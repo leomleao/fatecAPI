@@ -71,6 +71,30 @@ class _Controller_oAuth2 extends _Controller
         return TRUE;
     }
 
+    // needs an oAuth2 Client credentials grant
+    // with Resource owner credentials grant also works
+    public function grade(Request $request, Response $response, $args) {
+        if ($this->validateToken($request)) {
+            parent::grade($request, $response, $args);
+        }           
+    }
+
+    // needs an oAuth2 Client credentials grant
+    // with Resource owner credentials grant also works
+    public function gradeSchedule(Request $request, Response $response, $args) {
+        if ($this->validateToken($request)) {
+            parent::gradeSchedule($request, $response, $args);
+        }           
+    }
+
+    // needs an oAuth2 Client credentials grant
+    // with Resource owner credentials grant also works
+    public function changePassword(Request $request, Response $response, $args) {
+        if ($this->validateToken($request)) {
+            parent::changePassword($request, $response, $args);
+        }           
+    }
+
 	// needs an oAuth2 Client credentials grant
 	// with Resource owner credentials grant alseo works
     public function getAll(Request $request, Response $response, $args) {

@@ -36,7 +36,7 @@ request: POST http://fatecapi.tk/public/alunos
 Request headers send:
 Content-Type: application/json
 Authorization: Bearer MYTOKEN
-ra=RADOALUNO&password=SENHADOALUNO&grant_type=client_credentials
+ra=RADOALUNO&password=SENHADOALUNO
 
 ```
 
@@ -45,8 +45,7 @@ data can also be sended in JSON format:
 ```json
 {
 "ra":"RADOALUNO","
-password":"SENHADOALUNO",
-"grant_type":"client_credentials"
+password":"SENHADOALUNO"
 }
 ```
 SENHA must be in sha256*
@@ -160,49 +159,31 @@ It returns all the discipline's schedule of the student **in the current semeste
 ```json
 [
   {
-    "codhorario": "2",
-    "codcurso": null,
+    "disciplina": "Estágio Supervisionado",
+    "coddisciplina": "1",
+    "horario": "10:10 / 11:00",
+    "periododia": "3",
+    "diadasemana": "7",
     "ano": "2016",
-    "semestre": "2",
-    "periodo": "6",
-    "horario": "19:00 / 22:30",
+    "semestre": "2"
+  },
+  {
+    "disciplina": "Gestão e Governança de Tecnologia da Informação",
     "coddisciplina": "2",
-    "linha": null,
-    "login": null,
-    "dataalteracao": null,
-    "horaalteracao": null,
+    "horario": "19:00 / 19:50",
     "periododia": "3",
-    "disciplina": "Gestão e Governança de Tecnologia da Informação"
+    "diadasemana": "6",
+    "ano": "2016",
+    "semestre": "2"
   },
   {
-    "codhorario": "3",
-    "codcurso": null,
-    "ano": "2016",
-    "semestre": "2",
-    "periodo": "4",
-    "horario": "19:00 / 22:30",
-    "coddisciplina": "3",
-    "linha": null,
-    "login": null,
-    "dataalteracao": null,
-    "horaalteracao": null,
+    "disciplina": "Gestão e Governança de Tecnologia da Informação",
+    "coddisciplina": "2",
+    "horario": "19:50 / 20:40",
     "periododia": "3",
-    "disciplina": "Inteligência Artificial"
-  },
-  {
-    "codhorario": "4",
-    "codcurso": null,
+    "diadasemana": "6",
     "ano": "2016",
-    "semestre": "2",
-    "periodo": "7",
-    "horario": "07:30 / 08:20",
-    "coddisciplina": "4",
-    "linha": null,
-    "login": null,
-    "dataalteracao": null,
-    "horaalteracao": null,
-    "periododia": "3",
-    "disciplina": "Trabalho de Graduação II"
+    "semestre": "2"
   }
 ]
 ```

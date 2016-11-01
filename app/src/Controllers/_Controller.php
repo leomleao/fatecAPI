@@ -51,12 +51,28 @@ class _Controller
     {
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' Login triggered!');
 
-        $request_data = $request->getParsedBody();
+        $requestData = $request->getParsedBody();
 
-        $userGivenPassword = $request_data['password'];
-        $userID = $request_data['ra'];
+        if (!array_key_exists('password', $requestData) || !array_key_exists('ra', $requestData)){
+            $responseBody = array('error' => 'true', 'description' => 'Must give field /ra/ and field /password/');
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(400);
+        } else if ($requestData['ra'] == '' || $requestData['password'] == '' )
+            {
+                $responseBody = array('error' => 'true', 'description' => 'ra and password must have userID and hashed password (sha-256) respectively!');                
+                return $response->write(json_encode($responseBody))
+                            ->withStatus(401);
+            }
 
+        $userGivenPassword = $requestData['password'];
+        $userID = $requestData['ra'];
         $studentData = $this->dataaccess->get('alunos', array('ra' => $userID));
+
+        if (!array_key_exists('senha', $studentData)){
+            $responseBody = array('error' => 'true', 'description' => 'Something happened while retrieving data from db!');
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(500);
+        }
 
         
         if ($studentData['senha'] === $userGivenPassword){
@@ -92,6 +108,8 @@ class _Controller
 
         } else {
             $responseBody = array ('error' => true, 'description' => 'Something bad happened');
+            return $response->write(json_encode($responseBody))
+                        ->withStatus(404);
 
         } 
         return $response->write(json_encode($responseBody))
@@ -393,9 +411,9 @@ class _Controller
         $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
 
         $path = explode('/', $request->getUri()->getPath())[1];
-        $request_data = $request->getParsedBody();
+        $requestData = $request->getParsedBody();
 
-        $isupdated = $this->dataaccess->update($path, $args, $request_data);
+        $isupdated = $this->dataaccess->update($path, $args, $requestData);
         if ($isupdated) {
             return $response ->withStatus(200);
         } else {
