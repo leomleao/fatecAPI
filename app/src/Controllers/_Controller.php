@@ -240,19 +240,113 @@ class _Controller
             for ($j = 0;$j < count($studentGrade);$j++){
                 if($studentGrade[$j]['coddisciplina'] == $studentSchedule[$i]['coddisciplina'])
                 {
-                // $studentSchedule[$i]['disciplina'] = $studentGrade[$j]['disciplina'];
                 $studentSchedule[$i] = array('disciplina' => $studentGrade[$j]['disciplina']) + $studentSchedule[$i];
 
                 }
             }
         } 
 
-        // array_multisort($studentSchedule, SORT_ASC, ) 
         usort($studentSchedule, function ($a, $b) { return strnatcmp($a['coddisciplina'], $b['coddisciplina']); });          
 
 
 
         return $response->write(json_encode($studentSchedule))
+                        ->withStatus(200);
+
+
+        } else if($oAuthTokenData && $oAuthTokenData['client_id'] != $requestData['ra']){
+            
+            $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $oAuthTokenData['client_id'].' \'s token was used in a attempt to get another user\'s grade (' . $requestData['ra'] . ').');
+
+            $responseBody = array('error' => 'true', 'description' => 'This token belongs to another user, admin was reported!');
+
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(401);
+        } else {
+             $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $requestData['ra'] .' tried to request info using a invalid token.');
+
+            $responseBody = array('error' => 'true', 'description' => 'This token is invalid or no longer exists.');
+
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(440);
+        }
+
+    }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     * @param array                                    $args
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function files(Request $request, Response $response, $args)
+    {
+        $this->logger->info(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__);
+
+        $requestData = $request->getParsedBody();
+
+        if(!array_key_exists('ra', $requestData)){
+            //check for ra in the request
+            $responseBody = array('error' => 'true', 'description' => 'Invalid request, must give user_id!');
+
+            return $response->write(json_encode($responseBody))
+                            ->withStatus(400);
+        }
+
+        //prepare $args
+        $token = str_replace('Bearer ', '', $request->getServerParams()['HTTP_AUTHORIZATION']);
+
+        $oAuthTokenData = $this->dataaccess->get('oauth_access_tokens', array('access_token' => $token));
+
+        //check validity of token against the user_id
+        if ($oAuthTokenData && $oAuthTokenData['client_id'] === $requestData['ra']){
+
+        $studentGrade = $this->dataaccess->getJoin(
+            array('joinON' =>'coddisciplina', 'historico' => array('ra', 'coddisciplina', 'semestre', 'ano'), 'disciplinas' => array('disciplina')), array('ra' => $requestData['ra']));
+        $semester = explode('/',date('n/Y', time()))[0] <= 6 ?'1' : '2';
+        $ano = explode('/',date('n/Y', time()))[1];
+        $studentDisciplines = array();
+
+        for ($i = 0;$i < count($studentGrade);$i++){
+            if ($studentGrade[$i]['semestre'] && $studentGrade[$i]['ano']){
+               if ($studentGrade[$i]['ano'] != $ano || $studentGrade[$i]['semestre'] != $semester){                
+                unset($studentGrade[$i]);
+                $studentGrade = array_values($studentGrade);
+                $i--;
+                continue;
+               } 
+            array_push($studentDisciplines, array('coddisciplina' => $studentGrade[$i]['coddisciplina']));
+            }            
+        }
+
+        $studentFiles = $this->dataaccess->getJoin(
+            array('joinON' =>'id_pasta', 'intranet_pastas' => array('pasta', 'coddisciplina'), 'intranet_arquivos' => array('arquivo')), $studentDisciplines);
+
+
+        for ($i = 0; $i < count($studentFiles);$i++){   
+
+            for ($j = 0;$j < count($studentGrade);$j++){
+                if($studentGrade[$j]['coddisciplina'] == $studentFiles[$i]['coddisciplina'])
+                {
+                $studentFiles[$i] = array('disciplina' => $studentGrade[$j]['disciplina']) + $studentFiles[$i];
+
+                }
+            }
+        } 
+
+        usort($studentFiles, function ($a, $b) { return strnatcmp($a['coddisciplina'], $b['coddisciplina']); });  
+
+
+
+
+
+
+                
+
+
+
+        return $response->write(json_encode($studentFiles))
                         ->withStatus(200);
 
 

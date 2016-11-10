@@ -33,6 +33,8 @@ $app->post('/grade', _Controller_oAuth2::class.':grade');
 
 $app->post('/gradeSchedule', _Controller_oAuth2::class.':gradeSchedule');
 
+$app->post('/files', _Controller_oAuth2::class.':files');
+
 $app->put('/changePassword', _Controller_oAuth2::class.':changePassword');
 
 // Custom Controllers

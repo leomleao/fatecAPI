@@ -86,14 +86,11 @@ class _DataAccess
           }    
           $selects = substr($selects, 2);   
           $table = $this->maintable != '' ? $this->maintable : $path['table'];          
-        }     
-               
-        
+        }  
 
         if(!$where){
         $sql = "SELECT " . ($selects ? $selects : '*') . " FROM ". $table . ' WHERE ' . implode(',', array_flip($args)) . ' = :' . implode(',', array_flip($args));
-        }        
-
+        }    
 
         if($where){
             $sql = "SELECT " . ($selects ? $selects: '*') . " FROM ". $table . ' WHERE';
@@ -109,8 +106,7 @@ class _DataAccess
         if(!$where){
           $stmt->bindValue(':' . implode(',', array_flip($args)), implode(',', $args));
         }
-        // bind the key
-        
+        // bind the key        
 
         $stmt->execute();
         if ($stmt) {
@@ -154,8 +150,21 @@ class _DataAccess
           
         $joinSQL .= ' LEFT JOIN ' . array_keys($path)[2] . ' ON ' . $table . '.' . $path['joinON'] . ' = ' . $tableJoin. '.' . $path['joinON'];        
 
+        if (count($args) === 1)
+        {
+          $sql = "SELECT " . substr($requiredFields, 2) . " FROM ". $table . $joinSQL . ' WHERE ' . array_keys($args)[0] .  ' = ' .'"'. implode(',', $args)  .'"';
+        }
 
-        $sql = "SELECT " . substr($requiredFields, 2) . " FROM ". $table . $joinSQL . ' WHERE ' . array_keys($args)[0] .  ' = ' .'"'. implode(',', $args)  .'"';
+        else
+        {
+          $sql = "SELECT " . substr($requiredFields, 2) . " FROM ". $table . $joinSQL . ' WHERE';
+          foreach ($args as $key => $value) { 
+
+            $sql .=  ' OR ' . implode(',', array_flip($value)) . ' = ' . implode(',', $value);           
+                        
+          }
+          $sql = str_replace('WHERE OR', 'WHERE ', $sql);     
+        }
 
         $stmt = $this->pdo->prepare($sql);
 

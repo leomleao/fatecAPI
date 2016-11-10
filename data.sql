@@ -261,6 +261,33 @@ INSERT INTO `historico`(
  `notas2`
 ) VALUES ('141b22','8','2','2016','1','7.5','7.5','7.5');
 
+-- --------------------------------------------------------
+
+--
+--  Pastas
+--
+
+-- --------------------------------------------------------
+
+INSERT INTO `intranet_pastas` (`id_pasta`, `codprof`, `pasta`, `coddisciplina`, `periodo`) VALUES
+(615, '1', 'http://192.168.15.6:8888/fatecArquivos/pastaTCC/', '4', ''),
+(614, '1', 'http://192.168.15.6:8888/fatecArquivos/pastaIA/', '3', '');
+
+-- --------------------------------------------------------
+
+--
+--  Arquivos
+--
+
+-- --------------------------------------------------------
+
+INSERT INTO `intranet_arquivos` (`id_arq`, `id_pasta`, `arquivo`, `obs1`, `obs2`, `status`) VALUES
+(11571, 614, 'Exercicios_01_IA__.doc', '', '', '1'),
+(11572, 614, 'Exercicios_IA_04_Logica_Fuzzy.doc', '', '', '1'),
+(11573, 614, 'Exercicios_IA_AG.doc', '', '', '1'),
+(11574, 615, 'Modelo_TCC_Monografia_FATECJD.doc', '', '', '1'),
+(11575, 615, 'Modelo_TCC_Software_FATECJD-v1.2.doc', '', '', '1'),
+(11576, 615, 'cronograma-tg-II-ads-2016-2.pdf', '', '', '1');
 
 
 

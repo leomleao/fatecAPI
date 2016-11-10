@@ -350,6 +350,39 @@ CREATE TABLE IF NOT EXISTS `periodo` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura da tabela `intranet_arquivos`
+--
+
+CREATE TABLE IF NOT EXISTS `intranet_arquivos` ( 
+  `id_arq` int(11) NOT NULL AUTO_INCREMENT,
+   `id_pasta` int(11) NOT NULL,
+   `arquivo` varchar(200) NOT NULL,
+   `obs1` varchar(200) NOT NULL,
+   `obs2` varchar(1000) NOT NULL,
+   `status` char(1) NOT NULL,
+   PRIMARY KEY (`id_arq`),
+   KEY `id_pasta` (`id_pasta`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=11571
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `intranet_pastas`
+--
+
+CREATE TABLE IF NOT EXISTS `intranet_pastas` (
+  `id_pasta` int(11) NOT NULL AUTO_INCREMENT,
+  `codprof` char(12) NOT NULL,
+  `pasta` char(150) NOT NULL,
+  `coddi` char(20) NOT NULL,
+  `periodo` char(20) NOT NULL,
+  PRIMARY KEY (`id_pasta`),
+  UNIQUE KEY `codprof_2` (`codprof`,`coddi`),
+  KEY `codprof` (`codprof`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=613 ;
+
+-- --------------------------------------------------------
+--
 -- Estrutura da tabela `professores`
 --
 

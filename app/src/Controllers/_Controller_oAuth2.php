@@ -85,6 +85,14 @@ class _Controller_oAuth2 extends _Controller
         if ($this->validateToken($request)) {
             parent::gradeSchedule($request, $response, $args);
         }           
+    } 
+
+    // needs an oAuth2 Client credentials grant
+    // with Resource owner credentials grant also works
+    public function files(Request $request, Response $response, $args) {
+        if ($this->validateToken($request)) {
+            parent::files($request, $response, $args);
+        }           
     }
 
     // needs an oAuth2 Client credentials grant
