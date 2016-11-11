@@ -306,7 +306,8 @@ class _Controller
             array('joinON' =>'coddisciplina', 'historico' => array('ra', 'coddisciplina', 'semestre', 'ano'), 'disciplinas' => array('disciplina')), array('ra' => $requestData['ra']));
         $semester = explode('/',date('n/Y', time()))[0] <= 6 ?'1' : '2';
         $ano = explode('/',date('n/Y', time()))[1];
-        $studentDisciplines = array();
+
+        $whereClause = array();
 
         for ($i = 0;$i < count($studentGrade);$i++){
             if ($studentGrade[$i]['semestre'] && $studentGrade[$i]['ano']){
@@ -316,37 +317,45 @@ class _Controller
                 $i--;
                 continue;
                } 
-            array_push($studentDisciplines, array('coddisciplina' => $studentGrade[$i]['coddisciplina']));
+            array_push($whereClause, array('coddisciplina' => $studentGrade[$i]['coddisciplina']));
             }            
         }
+        array_push($whereClause, array('status' => 1));
 
         $studentFiles = $this->dataaccess->getJoin(
-            array('joinON' =>'id_pasta', 'intranet_pastas' => array('pasta', 'coddisciplina'), 'intranet_arquivos' => array('arquivo')), $studentDisciplines);
+            array('joinON' =>'id_pasta', 'intranet_pastas' => array('pasta', 'coddisciplina'), 'intranet_arquivos' => array('arquivo')), $whereClause);
 
 
-        for ($i = 0; $i < count($studentFiles);$i++){   
+        // for ($i = 0; $i < count($studentFiles);$i++){   
 
+        //     for ($j = 0;$j < count($studentGrade);$j++){
+        //         if($studentGrade[$j]['coddisciplina'] == $studentFiles[$i]['coddisciplina'])
+        //         {
+        //         $studentFiles[$i] = array('disciplina' => $studentGrade[$j]['disciplina']) + $studentFiles[$i];
+        //         break;
+
+        //         }
+        //     }
+        // } 
+
+        for ($i = 0; $i < count($studentFiles);$i++){ 
             for ($j = 0;$j < count($studentGrade);$j++){
                 if($studentGrade[$j]['coddisciplina'] == $studentFiles[$i]['coddisciplina'])
                 {
-                $studentFiles[$i] = array('disciplina' => $studentGrade[$j]['disciplina']) + $studentFiles[$i];
+                $tempFiles = array();
+                for ($y = 0; $y < count($studentFiles);$y++){
+                if ($studentFiles[$y]['coddisciplina'] == $studentFiles[$i]['coddisciplina'])
+                    $tempFiles[] = $studentFiles[$y]['arquivo'];
+                }
+                $files[] = array('disciplina' => $studentGrade[$j]['disciplina'], 'pasta' => $studentFiles[$i]['pasta'], 'arquivos' => $tempFiles);
 
+                break;
                 }
             }
         } 
 
-        usort($studentFiles, function ($a, $b) { return strnatcmp($a['coddisciplina'], $b['coddisciplina']); });  
 
-
-
-
-
-
-                
-
-
-
-        return $response->write(json_encode($studentFiles))
+        return $response->write(json_encode(array_values(array_unique($files, SORT_REGULAR))))
                         ->withStatus(200);
 
 

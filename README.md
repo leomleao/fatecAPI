@@ -211,38 +211,20 @@ It returns all the discipline's files of the student **in the current semester/y
   {
     "disciplina": "Inteligência Artificial",
     "pasta": "http://192.168.15.6:8888/fatecArquivos/pastaIA/",
-    "coddisciplina": "3",
-    "arquivo": "Exercicios_01_IA__.doc"
-  },
-  {
-    "disciplina": "Inteligência Artificial",
-    "pasta": "http://192.168.15.6:8888/fatecArquivos/pastaIA/",
-    "coddisciplina": "3",
-    "arquivo": "Exercicios_IA_04_Logica_Fuzzy.doc"
-  },
-  {
-    "disciplina": "Inteligência Artificial",
-    "pasta": "http://192.168.15.6:8888/fatecArquivos/pastaIA/",
-    "coddisciplina": "3",
-    "arquivo": "Exercicios_IA_AG.doc"
+    "arquivos": [
+      "Exercicios_01_IA__.doc",
+      "Exercicios_IA_04_Logica_Fuzzy.doc",
+      "Exercicios_IA_AG.doc"
+    ]
   },
   {
     "disciplina": "Trabalho de Graduação II",
     "pasta": "http://192.168.15.6:8888/fatecArquivos/pastaTCC/",
-    "coddisciplina": "4",
-    "arquivo": "Modelo_TCC_Monografia_FATECJD.doc"
-  },
-  {
-    "disciplina": "Trabalho de Graduação II",
-    "pasta": "http://192.168.15.6:8888/fatecArquivos/pastaTCC/",
-    "coddisciplina": "4",
-    "arquivo": "Modelo_TCC_Software_FATECJD-v1.2.doc"
-  },
-  {
-    "disciplina": "Trabalho de Graduação II",
-    "pasta": "http://192.168.15.6:8888/fatecArquivos/pastaTCC/",
-    "coddisciplina": "4",
-    "arquivo": "cronograma-tg-II-ads-2016-2.pdf"
+    "arquivos": [
+      "Modelo_TCC_Monografia_FATECJD.doc",
+      "Modelo_TCC_Software_FATECJD-v1.2.doc",
+      "cronograma-tg-II-ads-2016-2.pdf"
+    ]
   }
 ]
 ```
