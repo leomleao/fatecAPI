@@ -38,6 +38,10 @@ class _Controller
         $this->slim = $slim;
     }
 
+    public function jsonEncode($string){
+        return json_encode($string, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    }
+
 
 
     /**
@@ -55,12 +59,12 @@ class _Controller
 
         if (!array_key_exists('password', $requestData) || !array_key_exists('ra', $requestData)){
             $responseBody = array('error' => 'true', 'description' => 'Must give field /ra/ and field /password/');
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(400);
         } else if ($requestData['ra'] == '' || $requestData['password'] == '' )
             {
                 $responseBody = array('error' => 'true', 'description' => 'ra and password must have userID and hashed password (sha-256) respectively!');                
-                return $response->write(json_encode($responseBody))
+                return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(401);
             }
 
@@ -70,7 +74,7 @@ class _Controller
 
         if (!array_key_exists('senha', $studentData)){
             $responseBody = array('error' => 'true', 'description' => 'Something happened while retrieving data from db!');
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(500);
         }
 
@@ -108,11 +112,11 @@ class _Controller
 
         } else {
             $responseBody = array ('error' => true, 'description' => 'Something bad happened');
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                         ->withStatus(404);
 
         } 
-        return $response->write(json_encode($responseBody))
+        return $response->write($this->jsonEncode($responseBody))
                         ->withStatus(201);
     }
 
@@ -134,7 +138,7 @@ class _Controller
             //check for ra in the request
             $responseBody = array('error' => 'true', 'description' => 'Invalid request, must give user_id!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(400);
         }
 
@@ -163,7 +167,7 @@ class _Controller
             }            
         }
 
-        $response->write(json_encode($studentGrade))
+        $response->write($this->jsonEncode($studentGrade))
                  ->withStatus(200);
 
         } else if($oAuthTokenData && $oAuthTokenData['client_id'] != $requestData['ra']){
@@ -172,14 +176,14 @@ class _Controller
 
             $responseBody = array('error' => 'true', 'description' => 'This token belongs to another user, admin was reported!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(401);
         } else {
              $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $requestData['ra'] .' tried to request info using a invalid token.');
 
             $responseBody = array('error' => 'true', 'description' => 'This token is invalid or no longer exists.');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(440);
         }
 
@@ -202,7 +206,7 @@ class _Controller
             //check for ra in the request
             $responseBody = array('error' => 'true', 'description' => 'Invalid request, must give user_id!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(400);
         }
 
@@ -241,6 +245,7 @@ class _Controller
                 if($studentGrade[$j]['coddisciplina'] == $studentSchedule[$i]['coddisciplina'])
                 {
                 $studentSchedule[$i] = array('disciplina' => $studentGrade[$j]['disciplina']) + $studentSchedule[$i];
+                break;
 
                 }
             }
@@ -250,7 +255,7 @@ class _Controller
 
 
 
-        return $response->write(json_encode($studentSchedule))
+        return $response->write($this->jsonEncode($studentSchedule))
                         ->withStatus(200);
 
 
@@ -260,14 +265,14 @@ class _Controller
 
             $responseBody = array('error' => 'true', 'description' => 'This token belongs to another user, admin was reported!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(401);
         } else {
              $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $requestData['ra'] .' tried to request info using a invalid token.');
 
             $responseBody = array('error' => 'true', 'description' => 'This token is invalid or no longer exists.');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(440);
         }
 
@@ -290,7 +295,7 @@ class _Controller
             //check for ra in the request
             $responseBody = array('error' => 'true', 'description' => 'Invalid request, must give user_id!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(400);
         }
 
@@ -325,19 +330,6 @@ class _Controller
         $studentFiles = $this->dataaccess->getJoin(
             array('joinON' =>'id_pasta', 'intranet_pastas' => array('pasta', 'coddisciplina'), 'intranet_arquivos' => array('arquivo')), $whereClause);
 
-
-        // for ($i = 0; $i < count($studentFiles);$i++){   
-
-        //     for ($j = 0;$j < count($studentGrade);$j++){
-        //         if($studentGrade[$j]['coddisciplina'] == $studentFiles[$i]['coddisciplina'])
-        //         {
-        //         $studentFiles[$i] = array('disciplina' => $studentGrade[$j]['disciplina']) + $studentFiles[$i];
-        //         break;
-
-        //         }
-        //     }
-        // } 
-
         for ($i = 0; $i < count($studentFiles);$i++){ 
             for ($j = 0;$j < count($studentGrade);$j++){
                 if($studentGrade[$j]['coddisciplina'] == $studentFiles[$i]['coddisciplina'])
@@ -348,14 +340,13 @@ class _Controller
                     $tempFiles[] = $studentFiles[$y]['arquivo'];
                 }
                 $files[] = array('disciplina' => $studentGrade[$j]['disciplina'], 'pasta' => $studentFiles[$i]['pasta'], 'arquivos' => $tempFiles);
-
                 break;
                 }
             }
         } 
 
 
-        return $response->write(json_encode(array_values(array_unique($files, SORT_REGULAR))))
+        return $response->write($this->jsonEncode(array_values(array_unique($files, SORT_REGULAR))))
                         ->withStatus(200);
 
 
@@ -365,14 +356,14 @@ class _Controller
 
             $responseBody = array('error' => 'true', 'description' => 'This token belongs to another user, admin was reported!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(401);
         } else {
              $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $requestData['ra'] .' tried to request info using a invalid token.');
 
             $responseBody = array('error' => 'true', 'description' => 'This token is invalid or no longer exists.');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(440);
         }
 
@@ -395,7 +386,7 @@ class _Controller
             //check for ra in the request
             $responseBody = array('error' => 'true', 'description' => 'Invalid request, must give user_id!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(400);
         }
 
@@ -419,25 +410,25 @@ class _Controller
                     // 
 
                     if ($isupdated) {
-                        return $response->write(json_encode(array('error' => 'false', 'description' => 'Password updated successfully!')))
+                        return $response->write($this->jsonEncode(array('error' => 'false', 'description' => 'Password updated successfully!')))
                                         ->withStatus(200);
                     } else {
 
-                        return $response->write(json_encode(array('error' => 'true', 'description' => 'Password not updated!')))
+                        return $response->write($this->jsonEncode(array('error' => 'true', 'description' => 'Password not updated!')))
                                         ->withStatus(200);
                     }
                     // $oAuthUpdatePassword = $this->dataaccess->update('alunos', array('ra' => $userID));
                 } else {
-                    return $response->write(json_encode(array('error' => 'true', 'description' => 'Password and new password must match!')))
+                    return $response->write($this->jsonEncode(array('error' => 'true', 'description' => 'Password and new password must match!')))
                                         ->withStatus(200);
                 }              
             } else if(($requestData['rg'] && $requestData['rg'] != $studentData['rg']) || ($requestData['datanascimento'] && $requestData['datanascimento'] != date('d/m/Y', strtotime($studentData['datanascimento'])))){
-                 return $response->write(json_encode(array('error' => 'true', 'description' => 'RG and/or birth date doesn\'t match.'), JSON_UNESCAPED_SLASHES))
+                 return $response->write($this->jsonEncode(array('error' => 'true', 'description' => 'RG and/or birth date doesn\'t match.'), JSON_UNESCAPED_SLASHES))
                                         ->withStatus(200);
             }   
 
             else if(!$requestData['rg'] || !$requestData['datanascimento']){
-                 return $response->write(json_encode(array('error' => 'true', 'description' => 'No RG and/or birth date provided!'), JSON_UNESCAPED_SLASHES))
+                 return $response->write($this->jsonEncode(array('error' => 'true', 'description' => 'No RG and/or birth date provided!'), JSON_UNESCAPED_SLASHES))
                                         ->withStatus(200);
             }    
 
@@ -449,14 +440,14 @@ class _Controller
 
             $responseBody = array('error' => 'true', 'description' => 'This token belongs to another user, admin was reported!');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(401);
         } else {
              $this->logger->warning(substr(strrchr(rtrim(__CLASS__, '\\'), '\\'), 1).': '.__FUNCTION__. ' User_ID '. $requestData['ra'] .' tried to request info using a invalid token.');
 
             $responseBody = array('error' => 'true', 'description' => 'This token is invalid or no longer exists.');
 
-            return $response->write(json_encode($responseBody))
+            return $response->write($this->jsonEncode($responseBody))
                             ->withStatus(440);
         }
 
@@ -477,7 +468,7 @@ class _Controller
 
         $arrparams = $request->getParams();
 
-		return $response->write(json_encode($this->dataaccess->getAll($path[0], $arrparams)));
+		return $response->write($this->jsonEncode($this->dataaccess->getAll($path[0], $arrparams)));
     }
 
     /**
@@ -497,7 +488,7 @@ class _Controller
         if ($result == null) {
             return $response ->withStatus(404);
         } else {
-            return $response->write(json_encode($result));
+            return $response->write($this->jsonEncode($result));
         }
     }
     
