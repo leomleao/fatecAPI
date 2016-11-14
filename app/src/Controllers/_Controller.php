@@ -344,10 +344,14 @@ class _Controller
                 }
             }
         } 
-
-
+        if (!is_null($files)){
         return $response->write($this->jsonEncode(array_values(array_unique($files, SORT_REGULAR))))
                         ->withStatus(200);
+        }
+        $responseBody = array('error' => 'true', 'description' => 'No files available for this user!');
+
+        return $response->write($this->jsonEncode($responseBody))
+                            ->withStatus(401);
 
 
         } else if($oAuthTokenData && $oAuthTokenData['client_id'] != $requestData['ra']){
